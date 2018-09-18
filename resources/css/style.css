@@ -9,15 +9,15 @@
   }
   
   .mine-row {
-      height: 2rem;
+      height: 3rem;
       padding: 2px;
       margin-left:1px;
       display: flex;
   }
   
   .tile {
-      height: 1.5rem;
-      width: 1.5rem;
+      height: 2.5rem;
+      width: 2.5rem;
       margin: 1px;
       border: 1px black solid;
   }
