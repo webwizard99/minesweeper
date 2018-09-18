@@ -1,0 +1,27 @@
+#minesweeper-board {
+    background-color: rgb(120,120,160);
+    height: auto;
+    width: auto;
+    display: flex;
+    flex-direction:column;
+    margin-left: 3rem;
+    margin-right: 3rem;
+  }
+  
+  .mine-row {
+      height: 2rem;
+      padding: 2px;
+      margin-left:1px;
+      display: flex;
+  }
+  
+  .tile {
+      height: 1.5rem;
+      width: 1.5rem;
+      margin: 1px;
+      border: 1px black solid;
+  }
+  
+  .unrevealed {
+      background-color: rgb(80,80,80);
+  }
