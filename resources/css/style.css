@@ -1,5 +1,5 @@
 #minesweeper-board {
-    background-color: rgb(120,120,160);
+    background-color: rgb(60,60,100);
     height: auto;
     width: auto;
     display: flex;
@@ -23,5 +23,5 @@
   }
   
   .unrevealed {
-      background-color: rgb(80,80,80);
+      background-color: rgb(120,120,120);
   }
