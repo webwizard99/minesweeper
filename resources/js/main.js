@@ -1,3 +1,6 @@
+// ------------ ***** ----------
+// MinefieldController for minefield logic
+// ------------ ***** ----------
 const MinefieldController = (function(){
     
     // gridSize variable stores size of grid for game
@@ -34,7 +37,7 @@ const MinefieldController = (function(){
             }
             
             // determine number of bombs
-            let bombs = Math.floor((gridSize.height * gridSize.width) / 6);
+            let bombs = Math.floor((gridSize.height * gridSize.width) / 8);
 
             // generate array for volume of bombs and
             // free tiles, and array for randomized
@@ -66,15 +69,35 @@ const MinefieldController = (function(){
                 }
             }
 
-            gameGrid = boardT;
-            console.table(gameGrid);
-
+            gameGrid = boardT; //.slice(0,boardT.length);
             
-        }
+
+        },
+
+        checkTile: function(r, c) {
+            
+            // if tile has bomb return true
+            if (gameGrid[r - 1][c - 1]) {
+                return true;
+            } else {
+                return false;
+            }
+        },
+        
     }
 })();
 
+
+// ------------ ***** ----------
+// UIController for UI manipulation
+// ------------ ***** ----------
 const UIController = (function(){
+    const DOMStrings = {
+        minesweeperBoard: '#minesweeper-board',
+        tile: '.tile'
+    }
+    
+    // templates for drawing minefield
     const tileTemplate = `
         <div class="tile %status%" data-show="%show%" data-index="%r%-%c%">
         </div>
@@ -88,9 +111,10 @@ const UIController = (function(){
         </div>
     `;
 
+    //public methods
     return {
-        drawGrid: function(h,w) {
-            let board = document.getElementById('minesweeper-board');
+        drawGrid: function(h, w) {
+            let board = document.querySelector(DOMStrings.minesweeperBoard);
             board.innerHTML = null;
 
             let boardT = '';
@@ -115,13 +139,56 @@ const UIController = (function(){
             }
 
             board.innerHTML = boardT;
+            
+            board.style.width = `${(w * 28) + 30}px`;
+        },
+
+        getDomStrings: function() {
+            return DOMStrings;
+        },
+
+        showBomb: function(r, c) {
+            const locString = r + '-' + c;
+            let originTile = document.
+                querySelector(`[data-index="${locString}"]`);
+            originTile.style.backgroundColor = 'red';
+            originTile.innerHTML = `<i class="fa fa-bomb tile-contents"></i>`;
+        },
+
+        revealTile: function(r, c, num) {
+            let tile = document.querySelector(`[data-index="${r}-${c}"]`);
+            if (num > 0) {
+                tile.innerHTML = `<span class="tile-contents">${num}</span>`;
+            }
+            if (tile.classList.contains('unrevealed')) {
+                tile.classList.toggle('unrevealed');
+            }
+            if (!tile.classList.contains('revealed')) {
+                tile.classList.toggle('revealed');
+            }
         }
     }
 })();
 
+// ------------ ***** ----------
+// Controller for event listeners and main
+// program logic
+// ------------ ***** ----------
 const Controller = (function(MineCtrl, UICtrl){
-    const setEventListeners = function() {
+    // matrixes for checking tiles
+    const checkFull = [
+        [-1,-1], [-1, 0], [-1, 1],
+        [0,-1], [0, 1],
+        [1, -1], [1, 0], [1, 1]
+    ];
 
+    const checkAdjacent = [[-1,0], [0,-1], [0,1], [1,0]];
+    
+    const setEventListeners = function() {
+        const DOM = UICtrl.getDomStrings();
+
+        document.querySelector(DOM.minesweeperBoard)
+            .addEventListener('click', playerClick);
     }
 
     const startNewGame = function() {
@@ -130,7 +197,7 @@ const Controller = (function(MineCtrl, UICtrl){
         // values chosen in the interface
         // in the MinefieldController
         // temporary code to set a grid size
-        MineCtrl.setGridSize(8,8);
+        MineCtrl.setGridSize(12,12);
 
         // 2. Get the value of the minefield size
         const gameSize = MineCtrl.getGridSize();
@@ -142,6 +209,121 @@ const Controller = (function(MineCtrl, UICtrl){
         UICtrl.drawGrid(gameSize.height, gameSize.width);
 
     }
+
+    // process player click
+    const playerClick = function(e) {
+        
+        // if target is not a tile, exit function
+        if (!e.target.classList.contains('tile')) return;
+        const tCoords = e.target.getAttribute('data-index');
+        const arrCoords = tCoords.split('-');
+        const eRow = Number(JSON.parse(JSON.stringify(arrCoords[0])));
+        const eCol = Number(JSON.parse(JSON.stringify(arrCoords[1])));
+        
+        // begin a check of free tiles
+        clickWave(eRow, eCol);
+    }
+
+    // check all adjacent tiles in a cascade
+    // until no adjacent tiles that don't border
+    // bombs are left
+    const clickWave = function(r,c) {
+        const originStatus = MineCtrl.checkTile(r,c);
+        
+        // if tile has bomb, reveal bomb and end game
+        if (originStatus) {
+            UICtrl.showBomb(r,c);
+            
+            console.log('game over!');
+        } else {
+            // an array of tiles to check is iterated through
+            // until no further free tiles are detected
+            let tilesToCheck = [];
+            tilesToCheck.push([[r,c]]);
+            let allChecked = false;
+            let checkMap = generateEmptyCheckMap();
+            
+            while (allChecked === false) {
+                if (tilesToCheck.length > 0) {
+                    
+                    const thisCheck = tilesToCheck.slice(0,tilesToCheck.length);
+                    
+                    tilesToCheck.length = 0;
+                    thisCheck.forEach(function(member, n){
+                        
+                        let rThis = member[0][0];
+                        let cThis = member[0][1];
+                        
+                        let result = fullCheck(rThis,cThis);
+                        checkMap[rThis - 1][cThis - 1] = true;
+                        
+                        UICtrl.revealTile(rThis, cThis, result);
+                        // if no bombs are adjacent
+                        if (result === 0) {
+                            let checkList = checkFull.slice(0, checkFull.length);
+                            checkList.forEach(function(member, n) {
+                                // console.log(member);
+                                cRow = member[0] + rThis;
+                                cCol = member[1] + cThis;
+                                // console.log('cCoord: ', cRow, cCol);
+                                const size = MineCtrl.getGridSize();
+                                // if coordinate is out of bounds, skip
+                                if (cRow < 1 || cRow > size.height ||
+                                    cCol < 1 || cCol > size.width) {
+                                        return;
+                                    }
+                                // console.log(checkMap[cRow - 1][cCol -1]);
+                                // if tile hasn't been checked, add it to list
+                                // to be checked
+                                if (!checkMap[cRow -1][cCol -1]) {
+                                    tilesToCheck.push([[cRow,cCol]]);
+                                }
+                                
+                            
+                            });
+
+                        }
+                    });
+                } else {
+                    allChecked = true;
+                }
+            }
+        }
+    }
+
+    // checks all 8 tiles around a tile
+    const fullCheck = function(r, c) {
+        let checkList = checkFull.slice(0, checkFull.length);
+        let bombsFound = 0;
+        checkList.forEach(function(member, n){
+            let rThis = member[0] + (r);
+            let cThis = member[1] + (c);
+            const size = MineCtrl.getGridSize();
+            // if the tile is inbounds, check it for a mine
+            if (rThis > 1 && cThis > 1 && rThis <= size.height && cThis <= size.width) {
+                let res = MineCtrl.checkTile(rThis, cThis);
+                if (res) {
+                    bombsFound++;
+                } 
+            }
+        });
+        return bombsFound;
+    }
+
+    const generateEmptyCheckMap = function() {
+        let emptyMap = [];
+        let size = MineCtrl.getGridSize();
+        for (let eRow = 0; eRow < size.height; eRow++) {
+            let emptyRow = [];
+            for (let eCol = 0; eCol < size.width; eCol++) {
+                emptyRow.push(false);
+            }
+            emptyMap.push(emptyRow);
+        }
+        
+        return emptyMap;
+    }
+    
     
     return {
         init: function() {

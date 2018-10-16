@@ -4,8 +4,7 @@
     width: auto;
     display: flex;
     flex-direction:column;
-    margin-left: 3rem;
-    margin-right: 3rem;
+    margin:auto;
   }
   
   .mine-row {
@@ -19,9 +18,21 @@
       height: 2.5rem;
       width: 2.5rem;
       margin: 1px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       border: 1px black solid;
+  }
+
+  .tile-contents {
+    font-size: 1.5rem;
+    margin: auto;
   }
   
   .unrevealed {
       background-color: rgb(120,120,120);
   }
+
+  .revealed {
+    background-color: rgb(180,180,180);
+}
