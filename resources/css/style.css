@@ -36,3 +36,13 @@
   .revealed {
     background-color: rgb(180,180,180);
 }
+
+.slide-container {
+    width: 40%;
+    display: inline;
+}
+
+#size-display, #difficulty-display {
+    margin-left: 1rem;
+    font-weight: 1000;
+}

@@ -27,8 +27,10 @@ const MinefieldController = (function(){
             return gridSize;
         },
 
-        populateGrid: function() {
+        populateGrid: function(diff) {
             
+
+
             // create temporary 2D array for gameboard
             let boardDepth = gridSize.height;
             let boardT = [];
@@ -37,7 +39,7 @@ const MinefieldController = (function(){
             }
             
             // determine number of bombs
-            let bombs = Math.floor((gridSize.height * gridSize.width) / 8);
+            let bombs = Math.floor((gridSize.height * gridSize.width) * ((diff * 4) / 100));
 
             // generate array for volume of bombs and
             // free tiles, and array for randomized
@@ -94,7 +96,12 @@ const MinefieldController = (function(){
 const UIController = (function(){
     const DOMStrings = {
         minesweeperBoard: '#minesweeper-board',
-        tile: '.tile'
+        tile: '.tile',
+        start: '#start',
+        size: '#size',
+        difficulty: '#difficulty',
+        sizeDisplay: '#size-display',
+        diffDisplay: '#difficulty-display'
     }
     
     // templates for drawing minefield
@@ -166,6 +173,14 @@ const UIController = (function(){
             if (!tile.classList.contains('revealed')) {
                 tile.classList.toggle('revealed');
             }
+        },
+
+        hideMinefield: function() {
+            document.querySelector(DOMStrings.minesweeperBoard).style.visibility = 'hidden';
+        },
+
+        showMinefield: function() {
+            document.querySelector(DOMStrings.minesweeperBoard).style.visibility = 'visible';
         }
     }
 })();
@@ -182,6 +197,10 @@ const Controller = (function(MineCtrl, UICtrl){
         [1, -1], [1, 0], [1, 1]
     ];
 
+    const game = {
+        state: false
+    }
+
     const checkAdjacent = [[-1,0], [0,-1], [0,1], [1,0]];
     
     const setEventListeners = function() {
@@ -189,21 +208,46 @@ const Controller = (function(MineCtrl, UICtrl){
 
         document.querySelector(DOM.minesweeperBoard)
             .addEventListener('click', playerClick);
+
+        document.querySelector(DOM.start)
+        .addEventListener('click', startNewGame);
+        
+        document.querySelector(DOM.size)
+        .addEventListener('change', function(e){
+            document.querySelector(DOM.sizeDisplay).
+            textContent = document.querySelector(DOM.size).value;
+        });
+
+        document.querySelector(DOM.difficulty)
+        .addEventListener('change', function(e){
+            document.querySelector(DOM.diffDisplay).
+            textContent = document.querySelector(DOM.difficulty).value;
+        });
     }
 
-    const startNewGame = function() {
+    const startNewGame = function(e) {
+        e.preventDefault();
+        const DOM = UICtrl.getDomStrings();
+        const gSize = document.querySelector(DOM.size).value;
+        const gDiff = document.querySelector(DOM.difficulty).value;
+        
+        // -1. Set game state to on
+        game.state = true;
+
+        // 0. make minefield visible
+        UICtrl.showMinefield();
         
         // 1. Set the size of the minefield to the
         // values chosen in the interface
         // in the MinefieldController
         // temporary code to set a grid size
-        MineCtrl.setGridSize(12,12);
+        MineCtrl.setGridSize(gSize,gSize);
 
         // 2. Get the value of the minefield size
         const gameSize = MineCtrl.getGridSize();
 
         // 3. Set the mines in the minefield Controller
-        MineCtrl.populateGrid();
+        MineCtrl.populateGrid(gDiff);
 
         // 4. Draw the minefield with the UIController
         UICtrl.drawGrid(gameSize.height, gameSize.width);
@@ -214,7 +258,8 @@ const Controller = (function(MineCtrl, UICtrl){
     const playerClick = function(e) {
         
         // if target is not a tile, exit function
-        if (!e.target.classList.contains('tile')) return;
+        if (!e.target.classList.contains('tile')
+            || game.state === false) return;
         const tCoords = e.target.getAttribute('data-index');
         const arrCoords = tCoords.split('-');
         const eRow = Number(JSON.parse(JSON.stringify(arrCoords[0])));
@@ -233,8 +278,8 @@ const Controller = (function(MineCtrl, UICtrl){
         // if tile has bomb, reveal bomb and end game
         if (originStatus) {
             UICtrl.showBomb(r,c);
-            
-            console.log('game over!');
+            gameOver();
+            return;
         } else {
             // an array of tiles to check is iterated through
             // until no further free tiles are detected
@@ -323,6 +368,12 @@ const Controller = (function(MineCtrl, UICtrl){
         
         return emptyMap;
     }
+
+    const gameOver = function(){
+        game.state = false;
+    }
+
+    
     
     
     return {
@@ -331,7 +382,7 @@ const Controller = (function(MineCtrl, UICtrl){
             setEventListeners();
 
             // 2. Start a new game
-            startNewGame();
+            // startNewGame();
         }
     }
 })(MinefieldController, UIController);
