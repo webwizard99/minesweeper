@@ -103,6 +103,18 @@ const UIController = (function(){
         sizeDisplay: '#size-display',
         diffDisplay: '#difficulty-display'
     }
+
+    const colors = [
+        {r: 'ff', g:'00', b:'00'},
+        {r: '00', g:'ff', b:'00'},
+        {r: '00', g:'00', b:'ff'},
+        {r: 'ff', g:'ff', b:'00'},
+        {r: 'ff', g:'00', b:'ff'},
+        {r: '00', g:'ff', b:'ff'},
+        {r: 'ff', g:'77', b:'77'},
+        {r: '77', g:'ff', b:'77'},
+        {r: '77', g:'77', b:'ff'}
+    ];
     
     // templates for drawing minefield
     const tileTemplate = `
@@ -165,7 +177,8 @@ const UIController = (function(){
         revealTile: function(r, c, num) {
             let tile = document.querySelector(`[data-index="${r}-${c}"]`);
             if (num > 0) {
-                tile.innerHTML = `<span class="tile-contents">${num}</span>`;
+                tile.innerHTML = `<span class="tile-contents color-${num}">${num}</span>`;
+                tile.style.color = `rgba(${colors[num].r},${colors[num].g},${colors[num].b})`;
             }
             if (tile.classList.contains('unrevealed')) {
                 tile.classList.toggle('unrevealed');

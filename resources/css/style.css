@@ -1,3 +1,11 @@
+* {
+    /* background-color: rgba(240,240,240,.8); */
+}
+
+#minesweeper-container {
+    /* height: 100vh; */
+}
+
 #minesweeper-board {
     background-color: rgb(60,60,100);
     height: auto;
@@ -11,6 +19,7 @@
       height: 3rem;
       padding: 2px;
       margin-left:1px;
+      
       display: flex;
   }
   
@@ -43,7 +52,7 @@
 
 .slide-container {
     width: 40%;
-    display: inline;
+    display: inline-flex;
 }
 
 #size-display, #difficulty-display {
@@ -53,4 +62,40 @@
 
 #minesweeper-input {
     margin-left: 3rem;
+}
+
+.color-1 {
+    color: rgb(255,0,0);
+}
+
+.color-2 {
+    color: rgb(0,255,0);
+}
+
+.color-3 {
+    color: rgb(0,0,255);
+}
+
+.color-4 {
+    color: rgb(255,255,0);
+}
+
+.color-5 {
+    color: rgb(255,0,255);
+}
+
+.color-6 {
+    color: rgb(0,255,255);
+}
+
+.color-7 {
+    color: rgb(255,158,77)
+}
+
+.color-8 {
+    color: rgb(77,255,158);
+}
+
+.color-9 {
+    color: rgb(158,77,255)
 }
