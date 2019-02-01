@@ -320,17 +320,17 @@ const Controller = (function(MineCtrl, UICtrl){
                         if (result === 0) {
                             let checkList = checkFull.slice(0, checkFull.length);
                             checkList.forEach(function(member, n) {
-                                // console.log(member);
+                                
                                 cRow = member[0] + rThis;
                                 cCol = member[1] + cThis;
-                                // console.log('cCoord: ', cRow, cCol);
+                                
                                 const size = MineCtrl.getGridSize();
                                 // if coordinate is out of bounds, skip
                                 if (cRow < 1 || cRow > size.height ||
                                     cCol < 1 || cCol > size.width) {
                                         return;
                                     }
-                                // console.log(checkMap[cRow - 1][cCol -1]);
+                                
                                 // if tile hasn't been checked, add it to list
                                 // to be checked
                                 if (!checkMap[cRow -1][cCol -1]) {
@@ -395,7 +395,7 @@ const Controller = (function(MineCtrl, UICtrl){
             setEventListeners();
 
             // 2. Start a new game
-            // startNewGame();
+            
         }
     }
 })(MinefieldController, UIController);
